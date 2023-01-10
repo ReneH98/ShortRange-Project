@@ -71,15 +71,12 @@ class MyServerCallbacks: public BLEServerCallbacks {
       deviceConnected = true;
       Serial.println("device connected");
         
-      // send temp
       publishData(temp, pTempChar);
       tempBuffer = temp;
 
-      // send hum
       publishData(humidity, pHumChar);
       humidityBuffer = humidity;
       
-      // send co2
       publishData(CO2, pCO2Char);
       CO2Buffer = CO2;
     }
@@ -94,10 +91,7 @@ void setup() {
   Serial.begin(115200);
   Serial.println("Starting SmartHome_airquality Sensor!");
   randomSeed(millis());
-
-  /*
-     init Sensors
-  */
+  
   touchAttachInterrupt(TOUCH, touch_callback, TOUCH_THRESHOLD);
 
   // LEDs
@@ -159,9 +153,6 @@ void setup() {
   display.clearDisplay();
   display.display();
 
-  /*
-     init Bluetooth
-  */
   // init server
   Serial.println(BLE_NAME);
   BLEDevice::init(BLE_NAME);
@@ -224,12 +215,7 @@ void loop() {
     }
   }
 
-  if (deviceConnected) {
-
-    /*
-     * force publishing because of threshold
-     */
-      
+  if (deviceConnected) {      
      if (forcePublish_co2) {
         publishData(CO2, pCO2Char);
         Serial.print("Force Sent co2: "); Serial.println(CO2);
@@ -250,10 +236,6 @@ void loop() {
         forcePublish_hum = false;
         humidityBuffer = humidity;
      }
-
-    /*
-     * regular publishing during time period
-     */
      
     if (millis() - last_time_published_temp >= publish_time_temp) {
       last_time_published_temp = millis();
@@ -287,17 +269,14 @@ void loop() {
 
   }
 
-  // disconnecting
-  if (!deviceConnected && oldDeviceConnected) {
+  if (!deviceConnected && oldDeviceConnected) { // disconnecting
     delay(500); // give the bluetooth stack the chance to get things ready
     pServer->startAdvertising(); // restart advertising
     Serial.println("start advertising");
     oldDeviceConnected = deviceConnected;
   }
 
-  // connecting
-  if (deviceConnected && !oldDeviceConnected) {
-    // do stuff here on connecting
+  if (deviceConnected && !oldDeviceConnected) { // connecting
     oldDeviceConnected = deviceConnected;
   }
 
